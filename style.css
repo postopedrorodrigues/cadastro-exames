@@ -1,0 +1,36 @@
+body {
+    font-family: sans-serif;
+    margin: 20px;
+  }
+  textarea {
+    width: 100%;
+    height: 200px;
+    margin-top: 10px;
+    font-family: monospace;
+    white-space: pre-wrap;
+  }
+  .log {
+    background: #f4f4f4;
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-top: 20px;
+    font-family: monospace;
+    white-space: pre-wrap;
+  }
+  #dropZone {
+    border: 2px dashed #666;
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 20px;
+    background-color: #fafafa;
+    color: #444;
+    cursor: pointer;
+  }
+  #dropZone.hover {
+    background-color: #e0e0e0;
+  }
+  select, button {
+    margin-top: 10px;
+    padding: 8px;
+    font-size: 16px;
+  }

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Extrator de PDF - Pacientes</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>📥 Extrator de PDF - Pacientes</h1>
+
+  <div id="dropZone">📂 Arraste o PDF aqui ou clique para selecionar</div>
+  <input type="file" id="pdfInput" accept=".pdf" style="display: none;" />
+
+  <label for="status">📌 Status do Exame:</label>
+  <select id="status">
+    <option value="agendado">Agendado</option>
+    <option value="em andamento">Em andamento</option>
+    <option value="concluído">Concluído</option>
+    <option value="cancelado">Cancelado</option>
+  </select>
+
+  <h2>🔎 Texto extraído:</h2>
+  <textarea id="pdfText" readonly></textarea>
+
+  <h2>📋 JSON de dados extraídos:</h2>
+  <textarea id="jsonOutput" readonly></textarea>
+
+  <button id="enviarBtn">🚀 Enviar para API</button>
+
+  <h2>🛠️ Log de Debug:</h2>
+  <div class="log" id="logOutput">Aguardando arquivo...</div>
+
+  <script src="script.js">
+  
+  </script>
+</body>
+</html>
