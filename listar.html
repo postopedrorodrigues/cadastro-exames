@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lista de Pacientes e Exames</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .add-btn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 5px;
+      font-size: 16px;
+      text-decoration: none;
+    }
+
+    .filters {
+      margin: 20px 0;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"], select {
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f0f0f0;
+    }
+
+    .actions i {
+      cursor: pointer;
+      font-size: 18px;
+      margin: 0 6px;
+    }
+
+    .fa-trash { color: red; }
+    .fa-pen { color: #007BFF; }
+    .fa-sync { color: #ff9800; }
+
+    .status-agendado {
+      background-color: #ffebee;
+      color: red;
+      font-weight: bold;
+    }
+
+    .status-marcado {
+      background-color: #e8f5e9;
+      color: green;
+      font-weight: bold;
+    }
+
+    .status-concluido {
+      background-color: #e3f2fd;
+      color: #0d47a1;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="index.html">← Voltar</a>
+    <h1>📋 Lista de Pacientes e Exames</h1>
+    <a class="add-btn" href="extrator.html"><i class="fas fa-plus"></i> Adicionar Paciente</a>
+  </div>
+
+  <div class="filters">
+    <input type="text" id="searchInput" placeholder="🔍 Buscar por nome ou protocolo..." oninput="carregarExames()" />
+    <select id="statusFilter" onchange="carregarExames()">
+      <option value="">Todos os Status</option>
+      <option value="agendado">Agendado</option>
+      <option value="marcado">Marcado</option>
+      <option value="concluido">Concluído</option>
+    </select>
+  </div>
+
+  <table id="tabelaExames">
+    <thead>
+      <tr>
+        <th>Paciente</th>
+        <th>Protocolo</th>
+        <th>Status</th>
+        <th>Agendamento</th>
+        <th>Cadastro</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const formatarData = (data) => {
+      if (!data) return "";
+      const d = new Date(data);
+      const dia = String(d.getDate()).padStart(2, "0");
+      const mes = String(d.getMonth() + 1).padStart(2, "0");
+      const ano = d.getFullYear();
+      return `${dia}/${mes}/${ano}`;
+    };
+
+    async function carregarExames() {
+      try {
+        const resposta = await fetch("http://localhost:3000/api/exames");
+        const pacientes = await resposta.json();
+
+        const search = document.getElementById("searchInput").value.toLowerCase();
+        const filtroStatus = document.getElementById("statusFilter").value;
+
+        const tbody = document.querySelector("#tabelaExames tbody");
+        tbody.innerHTML = "";
+
+        pacientes
+          .filter(p => {
+            const nome = p.nome_paciente?.toLowerCase() || "";
+            const protocolo = p.protocolo || "";
+            const status = p.status?.toLowerCase() || "";
+            return (
+              (!search || nome.includes(search) || protocolo.includes(search)) &&
+              (!filtroStatus || status === filtroStatus)
+            );
+          })
+          .forEach((p) => {
+            const tr = document.createElement("tr");
+
+            // Aplica classe de status
+            let statusClass = "";
+            if (p.status === "agendado") statusClass = "status-agendado";
+            if (p.status === "marcado") statusClass = "status-marcado";
+            if (p.status === "concluido") statusClass = "status-concluido";
+
+            tr.innerHTML = `
+              <td>${p.nome_paciente}</td>
+              <td>${p.protocolo}</td>
+              <td class="${statusClass}">${p.status}</td>
+              <td>${formatarData(p.data_agendamento)}</td>
+              <td>${formatarData(p.data_cadastro)}</td>
+              <td class="actions">
+                <i class="fas fa-pen" title="Editar" onclick="editarPaciente(${p.id})"></i>
+                <i class="fas fa-sync" title="Atualizar Status" onclick="atualizarStatus(${p.id})"></i>
+                <i class="fas fa-trash" title="Excluir" onclick="excluirPaciente(${p.id})"></i>
+              </td>
+            `;
+
+            tbody.appendChild(tr);
+          });
+      } catch (error) {
+        alert("Erro ao carregar exames: " + error.message);
+      }
+    }
+
+    function editarPaciente(id) {
+      window.location.href = `editar.html?id=${id}`;
+    }
+
+    async function atualizarStatus(id) {
+      const novoStatus = prompt("Digite o novo status (agendado, marcado, concluido):");
+      if (!novoStatus) return;
+
+      try {
+        const respGet = await fetch(`http://localhost:3000/api/exames/${id}`);
+        const dados = await respGet.json();
+
+        dados.status = novoStatus.toLowerCase();
+
+        const resp = await fetch(`http://localhost:3000/api/exames/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dados)
+        });
+
+        if (resp.ok) {
+          carregarExames();
+        } else {
+          alert("Erro ao atualizar status.");
+        }
+      } catch (err) {
+        alert("Erro ao atualizar status: " + err.message);
+      }
+    }
+
+    function excluirPaciente(id) {
+      if (confirm("Deseja realmente excluir este paciente?")) {
+        fetch(`http://localhost:3000/api/exames/${id}`, {
+          method: "DELETE"
+        })
+        .then(resp => resp.ok ? carregarExames() : alert("Erro ao excluir."))
+        .catch(err => alert("Erro ao excluir: " + err));
+      }
+    }
+
+    carregarExames();
+  </script>
+</body>
+</html>

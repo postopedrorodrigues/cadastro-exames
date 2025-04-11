@@ -2,37 +2,72 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Extrator de PDF - Pacientes</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <title>Início - Sistema de Exames</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      padding: 40px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 40px;
+      color: #333;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+      max-width: 400px;
+      margin: auto;
+    }
+
+    a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+      background-color: #007BFF;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 6px;
+      font-size: 18px;
+      width: 100%;
+      transition: 0.2s ease;
+    }
+
+    a:hover {
+      background-color: #0056b3;
+    }
+
+    .icon {
+      font-size: 20px;
+    }
+  </style>
 </head>
 <body>
-  <h1>📥 Extrator de PDF - Pacientes</h1>
 
-  <div id="dropZone">📂 Arraste o PDF aqui ou clique para selecionar</div>
-  <input type="file" id="pdfInput" accept=".pdf" style="display: none;" />
+  <h1>💼 Sistema de Gestão de Exames</h1>
 
-  <label for="status">📌 Status do Exame:</label>
-  <select id="status">
-    <option value="agendado">Agendado</option>
-    <option value="em andamento">Em andamento</option>
-    <option value="concluído">Concluído</option>
-    <option value="cancelado">Cancelado</option>
-  </select>
+  <div class="menu">
+    <a href="extrator.html">
+      <i class="fas fa-file icon"></i> Extrair dados de PDF
+    </a>
 
-  <h2>🔎 Texto extraído:</h2>
-  <textarea id="pdfText" readonly></textarea>
+    <a href="listar.html">
+      <i class="fas fa-list icon"></i> Listar Pacientes
+    </a>
 
-  <h2>📋 JSON de dados extraídos:</h2>
-  <textarea id="jsonOutput" readonly></textarea>
+    <a href="formulario.html">
+      <i class="fas fa-user-plus icon"></i> Adicionar Paciente Manualmente
+    </a>
+  </div>
 
-  <button id="enviarBtn">🚀 Enviar para API</button>
-
-  <h2>🛠️ Log de Debug:</h2>
-  <div class="log" id="logOutput">Aguardando arquivo...</div>
-
-  <script src="script.js">
-  
-  </script>
 </body>
 </html>

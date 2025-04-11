@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Paciente</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 30px;
+            max-width: 800px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+        }
+
+        .exames-container {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .exame {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .exame input {
+            flex: 1;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .add-exame {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+
+        .submit-btn {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            width: 100%;
+        }
+
+        .voltar {
+            margin-top: 20px;
+            display: inline-block;
+        }
+
+        .remove-exame {
+            background-color: #e91e63;
+            color: white;
+            border: none;
+            font-weight: bold;
+            width: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>✏️ Editar Paciente</h1>
+
+    <form id="formPaciente">
+        <label>Nome do Paciente</label>
+        <input type="text" id="nome_paciente" required>
+
+        <label>Data de Nascimento</label>
+        <input type="date" id="data_nascimento" required>
+
+        <label>Cartão SUS</label>
+        <input type="text" id="cartao_sus" required>
+
+        <label>Endereço</label>
+        <input type="text" id="endereco">
+
+        <label>Telefone</label>
+        <input type="text" id="telefone">
+
+        <label>Protocolo</label>
+        <input type="text" id="protocolo" required>
+
+        <label>Unidade Solicitante</label>
+        <input type="text" id="unidade_solicitante">
+
+        <label>Profissional Solicitante</label>
+        <input type="text" id="profissional_solicitante">
+
+        <label>Status</label>
+        <select id="status">
+            <option value="agendado">Agendado</option>
+            <option value="em andamento">Em andamento</option>
+            <option value="concluído">Concluído</option>
+            <option value="cancelado">Cancelado</option>
+        </select>
+
+        <label>Data de Agendamento</label>
+        <input type="date" id="data_agendamento" required>
+
+        <div class="exames-container">
+            <label>🧪 Exames Solicitados</label>
+            <div id="exames"></div>
+            <button type="button" class="add-exame" onclick="addExame()">+ Adicionar Exame</button>
+        </div>
+
+        <button type="submit" class="submit-btn">💾 Salvar Alterações</button>
+    </form>
+
+    <a class="voltar" href="listar.html">← Voltar para lista</a>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const pacienteId = urlParams.get("id");
+
+        const examesDiv = document.getElementById("exames");
+
+        function addExame(codigo = '', nome = '', quantidade = 1) {
+            const exame = document.createElement("div");
+            exame.classList.add("exame");
+
+            exame.innerHTML = `
+        <input type="text" placeholder="Código" value="${codigo}" class="codigo" required>
+        <input type="text" placeholder="Nome do exame" value="${nome}" class="nome" required>
+        <input type="number" placeholder="Qtd" value="${quantidade}" class="quantidade" min="1" required>
+        <button type="button" class="remove-exame" onclick="this.parentElement.remove()">×</button>
+      `;
+
+            examesDiv.appendChild(exame);
+        }
+
+        async function carregarPaciente() {
+            try {
+                const resp = await fetch(`http://localhost:3000/api/exames/${pacienteId}`);
+                const data = await resp.json();
+                // Função auxiliar para converter data para formato yyyy-mm-dd
+                function formatarDataParaInput(dataTexto) {
+                    if (!dataTexto) return "";
+                    const data = new Date(dataTexto);
+                    const yyyy = data.getFullYear();
+                    const mm = String(data.getMonth() + 1).padStart(2, '0');
+                    const dd = String(data.getDate()).padStart(2, '0');
+                    return `${yyyy}-${mm}-${dd}`;
+                }
+                document.getElementById("nome_paciente").value = data.nome_paciente;
+                document.getElementById("data_nascimento").value = formatarDataParaInput(data.data_nascimento);
+                document.getElementById("cartao_sus").value = data.cartao_sus;
+                document.getElementById("endereco").value = data.endereco;
+                document.getElementById("telefone").value = data.telefone;
+                document.getElementById("protocolo").value = data.protocolo;
+                document.getElementById("unidade_solicitante").value = data.unidade_solicitante;
+                document.getElementById("profissional_solicitante").value = data.profissional_solicitante;
+                document.getElementById("status").value = data.status;
+                document.getElementById("data_agendamento").value = formatarDataParaInput(data.data_agendamento);
+
+                data.exames_solicitados.forEach(exame => {
+                    addExame(exame.codigo, exame.nome, exame.quantidade);
+                });
+
+            } catch (err) {
+                alert("Erro ao carregar paciente: " + err.message);
+            }
+        }
+
+        document.getElementById("formPaciente").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const paciente = {
+                nome_paciente: document.getElementById("nome_paciente").value,
+                data_nascimento: document.getElementById("data_nascimento").value,
+                cartao_sus: document.getElementById("cartao_sus").value,
+                endereco: document.getElementById("endereco").value,
+                telefone: document.getElementById("telefone").value,
+                protocolo: document.getElementById("protocolo").value,
+                unidade_solicitante: document.getElementById("unidade_solicitante").value,
+                profissional_solicitante: document.getElementById("profissional_solicitante").value,
+                status: document.getElementById("status").value,
+                data_agendamento: document.getElementById("data_agendamento").value,
+                exames_solicitados: []
+            };
+
+            const exames = document.querySelectorAll(".exame");
+            exames.forEach(exame => {
+                const codigo = exame.querySelector(".codigo").value;
+                const nome = exame.querySelector(".nome").value;
+                const quantidade = parseInt(exame.querySelector(".quantidade").value);
+                if (codigo && nome) {
+                    paciente.exames_solicitados.push({ codigo, nome, quantidade });
+                }
+            });
+
+            try {
+                const resp = await fetch(`http://localhost:3000/api/exames/${pacienteId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(paciente)
+                });
+
+                if (resp.ok) {
+                    alert("✅ Paciente atualizado com sucesso!");
+                    window.location.href = "listar.html";
+                } else {
+                    const erro = await resp.json();
+                    alert("Erro ao atualizar: " + (erro.error || 'Erro desconhecido'));
+                }
+            } catch (err) {
+                alert("Erro de conexão: " + err.message);
+            }
+        });
+
+        carregarPaciente();
+    </script>
+</body>
+
+</html>
